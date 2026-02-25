@@ -1,0 +1,107 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum MessageAuthorType {
+  CLIENT
+  ADMIN
+}
+
+model Property {
+  id              String          @id @default(cuid())
+  title           String
+  location        String
+  contactPhone    String?         @map("contact_phone")
+  privateNote     String?         @map("private_note")
+  areaM2          Float           @map("area_m2")
+  rentRate        Float           @map("rent_rate")
+  serviceRate     Float           @map("service_rate")
+  currency        String
+  monthlyTotal    Float?          @map("monthly_total")
+  term            String
+  description     String
+  visibleToClient Boolean         @default(true) @map("visible_to_client")
+  showDocsToClient Boolean        @default(true) @map("show_docs_to_client")
+  createdAt       DateTime        @default(now()) @map("created_at")
+  updatedAt       DateTime        @updatedAt @map("updated_at")
+  photos          PropertyPhoto[]
+  videos          PropertyVideo[]
+  docs            PropertyDoc[]
+  comments        ClientComment[]
+
+  @@map("properties")
+}
+
+model PropertyPhoto {
+  id         String   @id @default(cuid())
+  propertyId String   @map("property_id")
+  filePath   String   @map("file_path")
+  sortOrder  Int      @default(0) @map("sort_order")
+  createdAt  DateTime @default(now()) @map("created_at")
+  property   Property @relation(fields: [propertyId], references: [id], onDelete: Cascade)
+
+  @@index([propertyId, sortOrder])
+  @@map("property_photos")
+}
+
+model PropertyVideo {
+  id         String   @id @default(cuid())
+  propertyId String   @map("property_id")
+  fileName   String   @map("file_name")
+  filePath   String   @map("file_path")
+  mimeType   String   @map("mime_type")
+  sizeBytes  Int      @map("size_bytes")
+  createdAt  DateTime @default(now()) @map("created_at")
+  property   Property @relation(fields: [propertyId], references: [id], onDelete: Cascade)
+
+  @@index([propertyId])
+  @@map("property_videos")
+}
+
+model PropertyDoc {
+  id         String   @id @default(cuid())
+  propertyId String   @map("property_id")
+  fileName   String   @map("file_name")
+  filePath   String   @map("file_path")
+  mimeType   String   @map("mime_type")
+  sizeBytes  Int      @map("size_bytes")
+  createdAt  DateTime @default(now()) @map("created_at")
+  property   Property @relation(fields: [propertyId], references: [id], onDelete: Cascade)
+
+  @@index([propertyId])
+  @@map("property_docs")
+}
+
+model ClientComment {
+  id             String              @id @default(cuid())
+  propertyId     String              @map("property_id")
+  authorType     MessageAuthorType   @default(CLIENT) @map("author_type")
+  authorName     String?             @map("author_name")
+  telegramUserId String              @map("telegram_user_id")
+  text           String?
+  createdAt      DateTime            @default(now()) @map("created_at")
+  property       Property            @relation(fields: [propertyId], references: [id], onDelete: Cascade)
+  attachments    CommentAttachment[]
+
+  @@index([propertyId, createdAt])
+  @@map("client_comments")
+}
+
+model CommentAttachment {
+  id         String        @id @default(cuid())
+  commentId  String        @map("comment_id")
+  fileName   String        @map("file_name")
+  filePath   String        @map("file_path")
+  mimeType   String        @map("mime_type")
+  sizeBytes  Int           @map("size_bytes")
+  createdAt  DateTime      @default(now()) @map("created_at")
+  comment    ClientComment @relation(fields: [commentId], references: [id], onDelete: Cascade)
+
+  @@index([commentId])
+  @@map("comment_attachments")
+}

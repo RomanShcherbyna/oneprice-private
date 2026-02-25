@@ -1,0 +1,16 @@
+services:
+  postgres:
+    image: postgres:16
+    container_name: one-price-postgres
+    restart: unless-stopped
+    ports:
+      - "5433:5432"
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: oneprice
+    volumes:
+      - one_price_pgdata:/var/lib/postgresql/data
+
+volumes:
+  one_price_pgdata:

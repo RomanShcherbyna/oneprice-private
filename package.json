@@ -1,0 +1,36 @@
+{
+  "name": "one-price",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Mini CRM Telegram WebApp for one client",
+  "scripts": {
+    "dev": "npm run dev:web",
+    "dev:web": "next dev -p 4000",
+    "build": "next build",
+    "start": "next start",
+    "lint": "eslint .",
+    "prisma:generate": "prisma generate",
+    "prisma:migrate": "prisma migrate dev",
+    "prisma:studio": "prisma studio",
+    "db:seed": "tsx prisma/seed.ts",
+    "bot:dev": "unset TELEGRAM_BOT_TOKEN ADMIN_TELEGRAM_ID WEBAPP_URL && node --env-file=.env --watch --import tsx bot/index.ts",
+    "bot:start": "unset TELEGRAM_BOT_TOKEN ADMIN_TELEGRAM_ID WEBAPP_URL && node --env-file=.env --import tsx bot/index.ts"
+  },
+  "dependencies": {
+    "@prisma/client": "^6.16.2",
+    "next": "^16.1.6",
+    "prisma": "^6.16.2",
+    "react": "^19.2.4",
+    "react-dom": "^19.2.4",
+    "telegraf": "^4.16.3"
+  },
+  "devDependencies": {
+    "@types/node": "^25.3.0",
+    "@types/react": "^19.2.14",
+    "@types/react-dom": "^19.2.3",
+    "eslint": "^9.39.3",
+    "eslint-config-next": "^16.1.6",
+    "tsx": "^4.21.0",
+    "typescript": "^5.9.3"
+  }
+}

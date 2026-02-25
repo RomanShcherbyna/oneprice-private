@@ -253,6 +253,27 @@ function openLinksText(isAdmin: boolean): string {
   return ["Ссылка для открытия в браузере:", `Клиент: ${normalizedAppUrl}`].join("\n");
 }
 
+function buildMainKeyboard(ctx: { from: { id: number; username?: string; first_name?: string } }, isAdmin: boolean) {
+  const clientUrl = buildClientUrlWithUser(ctx);
+  const adminClientUrl = buildAdminUrlWithUser(ctx);
+  const canUseWebAppButtons = clientUrl.startsWith("https://");
+
+  if (isAdmin) {
+    if (canUseWebAppButtons) {
+      return Markup.keyboard([
+        [Markup.button.webApp("Открыть клиент", clientUrl), Markup.button.webApp("Открыть админку", adminClientUrl)],
+        ["Показать ссылки"]
+      ]).resize();
+    }
+    return Markup.keyboard([["Открыть клиент", "Открыть админку"], ["Показать ссылки"]]).resize();
+  }
+
+  if (canUseWebAppButtons) {
+    return Markup.keyboard([[Markup.button.webApp("Открыть клиент", clientUrl)], ["Показать ссылки"]]).resize();
+  }
+  return Markup.keyboard([["Открыть клиент"], ["Показать ссылки"]]).resize();
+}
+
 function resolveTelegramName(ctx: { from: { id: number; username?: string; first_name?: string } }): string {
   return (ctx.from.username || ctx.from.first_name || `user_${ctx.from.id}`).trim();
 }
@@ -334,11 +355,7 @@ bot.hears("Согласен ✅", async (ctx) => {
 
   await ctx.reply(
     openLinksText(isAdmin),
-    Markup.keyboard(
-      isAdmin
-        ? [["Открыть клиент", "Открыть админку"], ["Показать ссылки"]]
-        : [["Открыть клиент"], ["Показать ссылки"]]
-    ).resize()
+    buildMainKeyboard(ctx, isAdmin)
   );
 
   const clientUrl = buildClientUrlWithUser(ctx);

@@ -875,7 +875,7 @@ bot.catch((error) => {
   console.error("Unhandled bot error", error);
 });
 
-bot.launch().then(() => {
+bot.launch().then(async () => {
   bot.telegram
     .setMyCommands([
       { command: "start", description: "Запустить меню" },
@@ -887,30 +887,30 @@ bot.launch().then(() => {
       console.error("Failed to set commands", error);
     });
 
-  bot.telegram
-    .setChatMenuButton({
-      menu_button: {
+  try {
+    await bot.telegram.setChatMenuButton({
+      menuButton: {
         type: "web_app",
         text: "Открыть",
-        web_app: { url: normalizedAppUrl }
+        web_app: {
+          url: normalizedAppUrl
+        }
       }
-    })
-    .then(() => {
-      // #region agent log
-      debugLog("bot-open-client", "H49", "bot/index.ts:888", "Обновлена кнопка Open в Telegram меню", {
-        url: normalizedAppUrl
-      });
-      // #endregion
-    })
-    .catch((error) => {
-      // #region agent log
-      debugLog("bot-open-client", "H50", "bot/index.ts:896", "Не удалось обновить кнопку Open", {
-        errorMessage: error instanceof Error ? error.message : "unknown",
-        url: normalizedAppUrl
-      });
-      // #endregion
-      console.error("Failed to set chat menu button", error);
     });
+    // #region agent log
+    debugLog("bot-open-client", "H49", "bot/index.ts:888", "Обновлена кнопка Open в Telegram меню", {
+      url: normalizedAppUrl
+    });
+    // #endregion
+  } catch (error) {
+    // #region agent log
+    debugLog("bot-open-client", "H50", "bot/index.ts:896", "Не удалось обновить кнопку Open", {
+      errorMessage: error instanceof Error ? (error as Error).message : "unknown",
+      url: normalizedAppUrl
+    });
+    // #endregion
+    console.error("Failed to set chat menu button", error);
+  }
 
   console.log("Telegram bot started");
 }).catch((error) => {

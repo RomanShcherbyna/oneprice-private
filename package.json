@@ -6,15 +6,18 @@
   "scripts": {
     "dev": "npm run dev:web",
     "dev:web": "next dev -p 4000",
-    "build": "next build",
+    "build": "next build && npm run bot:build",
     "start": "next start",
+    "start:web": "next start",
     "lint": "eslint .",
     "prisma:generate": "prisma generate",
     "prisma:migrate": "prisma migrate dev",
     "prisma:studio": "prisma studio",
     "db:seed": "tsx prisma/seed.ts",
     "bot:dev": "unset TELEGRAM_BOT_TOKEN ADMIN_TELEGRAM_ID WEBAPP_URL && node --env-file=.env --watch --import tsx bot/index.ts",
-    "bot:start": "unset TELEGRAM_BOT_TOKEN ADMIN_TELEGRAM_ID WEBAPP_URL && node --env-file=.env --import tsx bot/index.ts"
+    "bot:start:local": "unset TELEGRAM_BOT_TOKEN ADMIN_TELEGRAM_ID WEBAPP_URL && node --env-file=.env --import tsx bot/index.ts",
+    "bot:build": "tsc -p tsconfig.bot.json",
+    "bot:start": "node dist/bot/index.js"
   },
   "dependencies": {
     "@prisma/client": "^6.16.2",

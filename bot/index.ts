@@ -48,6 +48,10 @@ if (!adminKey) {
 }
 
 const bot = new Telegraf(botToken);
+
+console.log("✅ TELEGRAM BOT STARTED");
+console.log("BOT TOKEN EXISTS:", Boolean(process.env.TELEGRAM_BOT_TOKEN));
+console.log("PUBLIC URL =", webAppUrl);
 const normalizedAppUrl = webAppUrl.endsWith("/") ? webAppUrl.slice(0, -1) : webAppUrl;
 const adminUrl = `${normalizedAppUrl}/admin`;
 const wizardByAdmin = new Map<number, WizardState>();
@@ -876,6 +880,13 @@ bot.catch((error) => {
 });
 
 bot.launch().then(async () => {
+  try {
+    const me = await bot.telegram.getMe();
+    console.log("✅ BOT CONNECTED:", me.username);
+  } catch (error) {
+    console.error("❌ BOT CONNECTION FAILED", error);
+  }
+
   bot.telegram
     .setMyCommands([
       { command: "start", description: "Запустить меню" },

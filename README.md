@@ -58,3 +58,42 @@ npm run bot:dev
 - Веб всегда поднимается на `http://localhost:4000`.
 - Кнопка бота открывает `WEBAPP_URL` из `.env`.
 - Уведомления о новом комментарии/вложении уходят на `ADMIN_TELEGRAM_ID`.
+
+## Деплой на Railway (web + bot)
+
+### 1. Общая схема
+
+Репозиторий один, но на Railway создаются **два сервиса**:
+
+- веб-сервис (Next.js)
+- worker-сервис для Telegram-бота (Telegraf long polling, без вебхуков)
+
+### 2. Веб-сервис (Next.js)
+
+- **Build Command**: `npm run build`
+- **Start Command**: `npm run start:web`
+- Переменные окружения (Web):
+  - `DATABASE_URL`
+  - `WEBAPP_URL` (публичный URL веб-приложения на Railway/Cloudflare)
+  - другие, которые нужны вебу/БД.
+
+### 3. Bot worker (Telegraf long polling)
+
+Создать второй сервис в том же проекте Railway, привязанный к этому же Git-репозиторию.
+
+- **Build Command**: `npm run bot:build`
+- **Start Command**: `npm run bot:start`
+
+Порты для этого сервиса не нужны (он не принимает HTTP-трафик, только long polling в Telegram API).
+
+Переменные окружения (Bot):
+
+- `TELEGRAM_BOT_TOKEN` — токен бота из BotFather.
+- `ADMIN_TELEGRAM_ID` — ваш Telegram ID (для админских уведомлений).
+- `ADMIN_KEY` — секрет для админских API-запросов.
+- `WEBAPP_URL` — публичный URL веб-приложения (тот же, что использует клиент; нужен для кнопки `Открыть` и ссылок).
+
+Важно:
+
+- Bot worker использует `bot/index.ts`, который в проде компилируется в `dist/bot/index.js` с помощью `npm run bot:build`.
+- Никаких webhook-конфигураций на Railway не нужно — бот работает только через `bot.launch()` (long polling).

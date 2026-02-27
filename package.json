@@ -10,7 +10,7 @@
     "build": "npm run build:web && npm run bot:build",
     "start": "next start",
     "start:web": "next start",
-    "start:web:prod": "sh -c 'echo \"[DB] migrate deploy\" && npx prisma migrate deploy && echo \"[WEB] next start\" && next start'",
+    "start:web:prod": "sh -c 'echo \"[DB] migrate deploy\" && npx prisma migrate deploy && echo \"[WEB] next start\" && next start -p $PORT -H 0.0.0.0'",
     "lint": "eslint .",
     "prisma:generate": "prisma generate",
     "prisma:migrate": "prisma migrate dev",

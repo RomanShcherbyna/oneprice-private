@@ -18,6 +18,7 @@
     "db:push": "prisma db push",
     "prisma:studio": "prisma studio",
     "db:seed": "tsx prisma/seed.ts",
+    "db:copy-to-railway": "tsx prisma/copyLocalToRailway.ts",
     "bot:dev": "unset TELEGRAM_BOT_TOKEN ADMIN_TELEGRAM_ID WEBAPP_URL && node --env-file=.env --watch --import tsx bot/index.ts",
     "bot:start:local": "unset TELEGRAM_BOT_TOKEN ADMIN_TELEGRAM_ID WEBAPP_URL && node --env-file=.env --import tsx bot/index.ts",
     "bot:build": "tsc -p tsconfig.bot.json",

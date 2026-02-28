@@ -44,6 +44,8 @@ export function PropertyCard({ item, telegramUserId, telegramUsername, onComment
   const [commentText, setCommentText] = useState("");
   const [files, setFiles] = useState<FileList | null>(null);
   const [error, setError] = useState("");
+  const [isGalleryOpen, setIsGalleryOpen] = useState(false);
+  const [currentPhotoIndex, setCurrentPhotoIndex] = useState<number | null>(null);
 
   const sortedPhotos = useMemo(
     () => [...item.photos].sort((a, b) => a.sortOrder - b.sortOrder),
@@ -97,6 +99,30 @@ export function PropertyCard({ item, telegramUserId, telegramUsername, onComment
       })
     }).catch(() => {});
     // #endregion
+  }
+
+  function handlePhotoClick(photoId: string, photoUrl: string, index: number) {
+    logClientPhotoTap(photoId, photoUrl);
+    if (!sortedPhotos.length) return;
+    setCurrentPhotoIndex(index);
+    setIsGalleryOpen(true);
+  }
+
+  function closeGallery() {
+    setIsGalleryOpen(false);
+    setCurrentPhotoIndex(null);
+  }
+
+  function showPrevPhoto() {
+    if (!sortedPhotos.length || currentPhotoIndex === null) return;
+    const nextIndex = (currentPhotoIndex - 1 + sortedPhotos.length) % sortedPhotos.length;
+    setCurrentPhotoIndex(nextIndex);
+  }
+
+  function showNextPhoto() {
+    if (!sortedPhotos.length || currentPhotoIndex === null) return;
+    const nextIndex = (currentPhotoIndex + 1) % sortedPhotos.length;
+    setCurrentPhotoIndex(nextIndex);
   }
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
@@ -166,13 +192,13 @@ export function PropertyCard({ item, telegramUserId, telegramUsername, onComment
 
       <div style={{ overflowX: "auto", display: "flex", gap: 8, marginBottom: 12 }}>
         {sortedPhotos.length > 0 ? (
-          sortedPhotos.map((photo) => (
+          sortedPhotos.map((photo, index) => (
             // eslint-disable-next-line @next/next/no-img-element
             <img
               key={photo.id}
               src={photo.url}
               alt={item.title}
-              onClick={() => logClientPhotoTap(photo.id, photo.url)}
+              onClick={() => handlePhotoClick(photo.id, photo.url, index)}
               style={{ width: 240, height: 150, objectFit: "cover", borderRadius: 8, cursor: "pointer" }}
             />
           ))
@@ -290,6 +316,113 @@ export function PropertyCard({ item, telegramUserId, telegramUsername, onComment
           {isSending ? "Отправка..." : "Отправить"}
         </button>
       </form>
+
+      {isGalleryOpen && currentPhotoIndex !== null && sortedPhotos[currentPhotoIndex] && (
+        <div
+          role="dialog"
+          aria-modal="true"
+          style={{
+            position: "fixed",
+            inset: 0,
+            background: "rgba(0, 0, 0, 0.9)",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            zIndex: 1000
+          }}
+          onClick={closeGallery}
+        >
+          <button
+            type="button"
+            onClick={(event) => {
+              event.stopPropagation();
+              closeGallery();
+            }}
+            style={{
+              position: "absolute",
+              top: 16,
+              right: 16,
+              background: "rgba(0, 0, 0, 0.7)",
+              color: "#fff",
+              border: "none",
+              borderRadius: 999,
+              width: 32,
+              height: 32,
+              cursor: "pointer",
+              fontSize: 20,
+              lineHeight: "32px",
+              textAlign: "center"
+            }}
+          >
+            ×
+          </button>
+
+          <button
+            type="button"
+            onClick={(event) => {
+              event.stopPropagation();
+              showPrevPhoto();
+            }}
+            style={{
+              position: "absolute",
+              left: 16,
+              top: "50%",
+              transform: "translateY(-50%)",
+              background: "rgba(0, 0, 0, 0.7)",
+              color: "#fff",
+              border: "none",
+              borderRadius: 999,
+              width: 32,
+              height: 32,
+              cursor: "pointer",
+              fontSize: 20,
+              lineHeight: "32px",
+              textAlign: "center"
+            }}
+          >
+            ‹
+          </button>
+
+          <button
+            type="button"
+            onClick={(event) => {
+              event.stopPropagation();
+              showNextPhoto();
+            }}
+            style={{
+              position: "absolute",
+              right: 16,
+              top: "50%",
+              transform: "translateY(-50%)",
+              background: "rgba(0, 0, 0, 0.7)",
+              color: "#fff",
+              border: "none",
+              borderRadius: 999,
+              width: 32,
+              height: 32,
+              cursor: "pointer",
+              fontSize: 20,
+              lineHeight: "32px",
+              textAlign: "center"
+            }}
+          >
+            ›
+          </button>
+
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img
+            src={sortedPhotos[currentPhotoIndex].url}
+            alt={item.title}
+            style={{
+              maxWidth: "90vw",
+              maxHeight: "80vh",
+              objectFit: "contain",
+              borderRadius: 8
+            }}
+            onClick={(event) => event.stopPropagation()}
+          />
+        </div>
+      )}
     </article>
   );
 }

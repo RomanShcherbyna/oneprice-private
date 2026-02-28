@@ -42,6 +42,49 @@ export default function ClientMiniAppPage() {
         }
       });
       if (!res.ok) {
+        // #region agent log
+        try {
+          const debugBody = await res.text();
+          fetch("http://127.0.0.1:7844/ingest/4b4bde9f-ccf9-4dcf-b693-48a9dbeb8ce6", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+              "X-Debug-Session-Id": "4e8591"
+            },
+            body: JSON.stringify({
+              sessionId: "4e8591",
+              runId: "client-properties",
+              hypothesisId: "H4",
+              location: "app/page.tsx:45",
+              message: "Ответ /api/client/properties с ошибкой",
+              data: {
+                status: res.status,
+                bodyPreview: debugBody.slice(0, 200)
+              },
+              timestamp: Date.now()
+            })
+          }).catch(() => {});
+        } catch {
+          fetch("http://127.0.0.1:7844/ingest/4b4bde9f-ccf9-4dcf-b693-48a9dbeb8ce6", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+              "X-Debug-Session-Id": "4e8591"
+            },
+            body: JSON.stringify({
+              sessionId: "4e8591",
+              runId: "client-properties",
+              hypothesisId: "H4",
+              location: "app/page.tsx:45",
+              message: "Ответ /api/client/properties с ошибкой (без тела)",
+              data: {
+                status: res.status
+              },
+              timestamp: Date.now()
+            })
+          }).catch(() => {});
+        }
+        // #endregion
         throw new Error("Ошибка загрузки объектов");
       }
       const data = (await res.json()) as { items: ApiProperty[] };

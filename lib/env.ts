@@ -5,6 +5,6 @@ export const env = {
   adminTelegramId: process.env.ADMIN_TELEGRAM_ID ?? "",
   nextPublicAppUrl: process.env.NEXT_PUBLIC_APP_URL ?? "",
   webappUrl: process.env.WEBAPP_URL ?? process.env.NEXT_PUBLIC_APP_URL ?? "",
-  uploadsDir: "./uploads",
+  uploadsDir: process.env.UPLOADS_DIR ?? "./uploads",
   maxUploadSizeMb: 20
 };

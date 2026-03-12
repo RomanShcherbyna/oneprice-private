@@ -8,6 +8,9 @@ export async function GET(req: NextRequest) {
   const unauthorized = ensureAdmin(req);
   if (unauthorized) return unauthorized;
 
+  const url = new URL(req.url);
+  const format = url.searchParams.get("format");
+
   const items = await prisma.property.findMany({
     include: {
       photos: true,
@@ -22,6 +25,78 @@ export async function GET(req: NextRequest) {
     },
     orderBy: { createdAt: "desc" }
   });
+
+  if (format === "csv") {
+    const header = [
+      "id",
+      "title",
+      "location",
+      "contactPhone",
+      "privateNote",
+      "areaM2",
+      "rentRate",
+      "serviceRate",
+      "currency",
+      "monthlyTotal",
+      "term",
+      "description",
+      "visibleToClient",
+      "showDocsToClient",
+      "createdAt",
+      "updatedAt",
+      "photosCount",
+      "videosCount",
+      "docsCount",
+      "commentsCount"
+    ];
+
+    const escapeCsv = (value: unknown): string => {
+      if (value === null || value === undefined) return "";
+      const str = String(value);
+      const escaped = str.replace(/"/g, '""');
+      return `"${escaped}"`;
+    };
+
+    const lines = [
+      header.join(","),
+      ...items.map((item) =>
+        [
+          item.id,
+          item.title,
+          item.location,
+          item.contactPhone ?? "",
+          item.privateNote ?? "",
+          item.areaM2,
+          item.rentRate,
+          item.serviceRate,
+          item.currency,
+          item.monthlyTotal ?? "",
+          item.term,
+          item.description,
+          item.visibleToClient,
+          item.showDocsToClient,
+          item.createdAt.toISOString(),
+          item.updatedAt.toISOString(),
+          item.photos.length,
+          item.videos.length,
+          item.docs.length,
+          item.comments.length
+        ].map(escapeCsv).join(",")
+      )
+    ];
+
+    const csv = lines.join("\n");
+
+    return new NextResponse(csv, {
+      status: 200,
+      headers: {
+        "Content-Type": "text/csv; charset=utf-8",
+        "Content-Disposition": `attachment; filename="properties-${new Date()
+          .toISOString()
+          .slice(0, 10)}.csv"`
+      }
+    });
+  }
 
   return NextResponse.json({
     items: items.map((item) => serializeProperty(item, { includePrivateFields: true }))

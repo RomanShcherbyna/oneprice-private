@@ -87,6 +87,37 @@ export default function AdminListPage() {
   }
   // #endregion
 
+  async function downloadCsv() {
+    try {
+      if (!adminKey) {
+        setError("Сначала введите admin key и нажмите «Применить ключ»");
+        return;
+      }
+
+      const res = await fetch("/api/admin/properties?format=csv", {
+        headers: {
+          Authorization: `Bearer ${adminKey}`
+        }
+      });
+
+      if (!res.ok) {
+        throw new Error("Не удалось скачать CSV, проверьте admin key");
+      }
+
+      const blob = await res.blob();
+      const url = window.URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = `properties-${new Date().toISOString().slice(0, 10)}.csv`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      window.URL.revokeObjectURL(url);
+    } catch (e) {
+      setError(e instanceof Error ? e.message : "Ошибка скачивания CSV");
+    }
+  }
+
   return (
     <main className="container">
       <div className="top-actions">
@@ -105,9 +136,14 @@ export default function AdminListPage() {
             onChange={(e) => setAdminKey(e.target.value)}
           />
         </div>
-        <button type="button" onClick={onApplyKey}>
-          Применить ключ
-        </button>
+        <div className="row">
+          <button type="button" onClick={onApplyKey}>
+            Применить ключ
+          </button>
+          <button type="button" onClick={downloadCsv}>
+            Скачать CSV
+          </button>
+        </div>
         {error && <p style={{ color: "crimson" }}>{error}</p>}
       </div>
 

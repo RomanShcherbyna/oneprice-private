@@ -46,6 +46,33 @@ export async function GET(req: NextRequest) {
     });
 
     // #region agent log
+    fetch("http://127.0.0.1:7687/ingest/8763eeef-e15c-4e65-8846-954cee9a65ad", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "X-Debug-Session-Id": "ae818a"
+      },
+      body: JSON.stringify({
+        sessionId: "ae818a",
+        runId: "client-properties",
+        hypothesisId: "H3",
+        location: "app/api/client/properties/route.ts:52",
+        message: "Список объектов для клиента получен, логируем фото",
+        data: {
+          count: items.length,
+          firstPhotosCount: items[0]?.photos?.length ?? 0,
+          firstPhotoSample: items[0]?.photos?.slice(0, 3).map((p) => ({
+            id: p.id,
+            sortOrder: p.sortOrder,
+            filePath: p.filePath
+          }))
+        },
+        timestamp: Date.now()
+      })
+    }).catch(() => {});
+    // #endregion
+
+    // #region agent log
     fetch("http://127.0.0.1:7844/ingest/4b4bde9f-ccf9-4dcf-b693-48a9dbeb8ce6", {
       method: "POST",
       headers: {
